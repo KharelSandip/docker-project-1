@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    build:  
+      context: .
+      dockerfile: Dockerfile
+    
+    container_name: docker-project-1-app
+    
+    ports:
+      - "3000:3000"
+    
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - LOG_LEVEL=info
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    
+    networks:
+      - app-network
+    
+   healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+
+networks:
+  app-network:
+    driver: bridge
+    name: docker-project-1-network
