@@ -1,313 +1,145 @@
-# Docker-project
+[![CI Pipeline Docker Project](https://github.com/KharelSandip/docker-project-1/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/KharelSandip/docker-project-1/actions/workflows/main.yml)
 
-A containerized Node.js application demonstrating production-ready Docker practices and DevOps workflows.
+# Docker-Project
+
+A containerized Node.js application demonstrating Docker best practices, Docker Compose orchestration, and automated CI/CD pipelines with security scanning.
 
 ---
 
+## What This Project Demonstrates
 
-## Tech Stack
+This project showcases essential DevOps practices:
 
-- **Runtime**: Node.js
-- **Containerization**: Docker
-- **Application**: Server.js
-- **Package Management**: npm
-- **Version Control**: Git/GitHub
-
+- **Docker Containerization**: 
+- **Docker Compose**: 
+- **GitHub Actions CI**: 
+- **Reproducible Builds**: 
+- **Container Security Scanning**: 
+- **Infrastructure as Code**: 
 ---
 
 ## Project Structure
 ```
 docker-project-1/
-├── Dockerfile              # Container image definition
-├── server.js               # Node.js application entry point
-├── package.json            # Node.js dependencies and scripts
-├── package-lock.json       # Locked dependency versions
-├── .dockerignore           # Files excluded from Docker build context
+├── .github/
+│   └── workflows/
+│       └── main.yml              # GitHub Actions CI pipeline
+├── Dockerfile                  # Container image definition
+├── docker-compose.yml          # Multi-container orchestration
+├── server.js                   # Node.js application
+├── package.json                # Node.js dependencies
+├── package-lock.json           # Locked dependency versions
+├── .dockerignore               # Build context exclusions
+└── .gitignore                  # Version control exclusions
 ```
 
 **Key Files:**
-- `Dockerfile`: Defines the container image, dependencies, and runtime configuration
-- `server.js`: Main application logic and HTTP server
-- `package.json`: Defines Node.js dependencies, scripts, and project metadata
-- `.dockerignore`: Excludes `node_modules/`, logs, and other unnecessary files from image builds
+- `main.yml`: Automates build, test, and security scanning workflows
+- `Dockerfile`: Defines container image with Node.js runtime and application code
+- `docker-compose.yml`: Configures service deployment with resource limits and networking
+- `.dockerignore`: Excludes unnecessary files from image builds
 
 ---
 
-## Prerequisites
+## How to Run (Docker Compose)
 
-- **Docker**: Version 20.10+ ([Install Docker](https://docs.docker.com/get-docker/))
-- **Node.js**: Version 14+ (for local development only)
-- **npm**: Version 6+ (comes with Node.js)
-- **Git**: For cloning the repository
+### Prerequisites
+- Docker 20.10+
+- Docker Compose 2.0+
 
-Verify installations:
-```bash
-docker --version
-node --version
-npm --version
-```
-
----
-
-## Quickstart (Local)
-
-Run the application directly on your host machine:
+### Start the Application
 ```bash
 # Clone the repository
 git clone https://github.com/KharelSandip/docker-project-1.git
 cd docker-project-1
 
-# Install dependencies
-npm install
+# Build and start services
+docker-compose up --build
 
-# Start the application
-npm start
+# Run in detached mode
+docker-compose up --build -d
 ```
 
-The application will start on the configured port (default: 3000).
+The application runs on **port 3000** by default.
 
----
-
-## Quickstart (Docker)
-
-### Build the Image
+### Stop the Application
 ```bash
-# Build the Docker image
-docker build -t docker-project-1:latest .
+# Stop and remove containers
+docker-compose down
 
-# Verify the image was created
-docker images | grep docker-project-1
-```
-
-### Run the Container
-```bash
-# Run container with port mapping
-docker run -d \
-  --name docker-project-1-app \
-  -p 3000:3000 \
-  docker-project-1:latest
-
-# Check container status
-docker ps
-```
-
-### Verify It Works
-```bash
-# Test the application (if "/" endpoint is implemented)
-curl http://localhost:3000
-
-# Test health endpoint (if "/health" endpoint is implemented)
-curl http://localhost:3000/health
-```
-
-### Stop and Remove
-```bash
-# Stop the container
-docker stop docker-project-1-app
-
-# Remove the container
-docker rm docker-project-1-app
+# Stop and remove containers, networks, and volumes
+docker-compose down -v
 ```
 
 ---
 
-## Configuration
+## CI Pipeline Overview
 
-### Environment Variables
+The GitHub Actions workflow (`.github/workflows/ci.yml`) runs automatically on:
+- Push to `main` branch
+- Pull requests targeting `main`
 
-| Name | Default | Description |
-|------|---------|-------------|
-| `PORT` | `3000` | HTTP port the application listens on |
-| `NODE_ENV` | `production` | Node.js environment (development/production) |
-| `LOG_LEVEL` | `info` | Application logging verbosity |
+**Pipeline Steps:**
 
-**Example with custom environment variables:**
-```bash
-docker run -d \
-  --name docker-project-1-app \
-  -p 8080:8080 \
-  -e PORT=8080 \
-  -e NODE_ENV=development \
-  -e LOG_LEVEL=debug \
-  docker-project-1:latest
-```
+1. **Checkout Code**: Retrieves repository content
+2. **Setup Node.js**: Configures Node.js 20 LTS environment with dependency caching
+3. **Install Dependencies**: Runs `npm ci` for reproducible builds
+4. **Run Tests**: Executes test suite if `npm test` is configured (continues if tests are not present)
+5. **Build Docker Image**: Creates image tagged as `docker-project-1:ci`
+6. **Trivy Vulnerability Scan**: Scans image for HIGH and CRITICAL vulnerabilities
+7. **Upload Scan Report**: Saves `trivy-report.txt` as artifact
 
-### Ports
-
-- **Default Application Port**: `3000`
-- **Container Port**: Matches `PORT` environment variable
-- **Host Port**: Configure via `-p` flag (e.g., `-p 8080:3000`)
+**Artifact Access:**
+- Navigate to the Actions tab in GitHub
+- Select a workflow run
+- Download `trivy-vulnerability-report` from the Artifacts section
 
 ---
 
-## Troubleshooting
+## Security Scanning
 
-### 1. Port Already in Use
+This project uses **Trivy** to scan Docker images for known vulnerabilities.
 
-**Error**: `bind: address already in use`
+**Scanning Policy:**
+- Targets: HIGH and CRITICAL severity vulnerabilities
+- Failure Condition: Pipeline fails if HIGH or CRITICAL vulnerabilities are detected
+- Report Format: Table output saved to `trivy-report.txt`
 
-**Solution**:
-```bash
-# Find process using the port
-lsof -i :3000  # macOS/Linux
-netstat -ano | findstr :3000  # Windows
+**Why This Matters:**
+- Identifies security risks before deployment
+- Enforces compliance with security standards
+- Provides audit trail for vulnerability management
 
-# Kill the process or use a different port
-docker run -p 8080:3000 docker-project-1:latest
-```
-
-### 2. `node_modules` Missing (Local)
-
-**Error**: `Cannot find module 'express'`
-
-**Solution**:
-```bash
-# Remove existing modules and reinstall
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### 3. Docker Build Cache Issues
-
-**Problem**: Changes not reflected in new build
-
-**Solution**:
-```bash
-# Build without cache
-docker build --no-cache -t docker-project-1:latest .
-```
-
-### 4. Permission Denied (Docker Socket)
-
-**Error**: `permission denied while trying to connect to the Docker daemon socket`
-
-**Solution**:
-```bash
-# Add user to docker group (Linux)
-sudo usermod -aG docker $USER
-newgrp docker
-
-# Or run with sudo (not recommended for production)
-sudo docker build -t docker-project-1:latest .
-```
-
-### 5. Container Exits Immediately
-
-**Problem**: `docker ps` shows no running containers
-
-**Solution**:
-```bash
-# Check container logs
-docker logs docker-project-1-app
-
-# Run container in foreground to see output
-docker run --rm -p 3000:3000 docker-project-1:latest
-
-# Check if application has syntax errors
-npm start
-```
-
-### 6. Image Build Fails - `COPY` Error
-
-**Error**: `COPY failed: file not found`
-
-**Solution**:
-```bash
-# Verify files exist
-ls -la
-
-# Check .dockerignore isn't excluding required files
-cat .dockerignore
-
-# Ensure you're in the correct directory
-pwd
-```
-
-### 7. Cannot Access Application on `localhost`
-
-**Problem**: `curl: (7) Failed to connect to localhost port 3000`
-
-**Solution**:
-```bash
-# Verify container is running
-docker ps
-
-# Check port mapping
-docker port docker-project-1-app
-
-# Try 127.0.0.1 instead of localhost
-curl http://127.0.0.1:3000
-
-# On macOS with Docker Desktop, use host.docker.internal
-```
-
-### 8. Old Image Still Running After Rebuild
-
-**Problem**: Changes not visible after rebuilding
-
-**Solution**:
-```bash
-# Stop and remove old container
-docker stop docker-project-1-app
-docker rm docker-project-1-app
-
-# Remove old image
-docker rmi docker-project-1:latest
-
-# Rebuild and run
-docker build -t docker-project-1:latest .
-docker run -d --name docker-project-1-app -p 3000:3000 docker-project-1:latest
-```
-
-### 9. High Memory Usage
-
-**Problem**: Container consuming excessive memory
-
-**Solution**:
-```bash
-# Run with memory limits
-docker run -d \
-  --name docker-project-1-app \
-  -p 3000:3000 \
-  --memory="512m" \
-  --memory-swap="512m" \
-  docker-project-1:latest
-
-# Monitor resource usage
-docker stats docker-project-1-app
-```
-
-### 10. `npm install` Fails During Build
-
-**Error**: Network timeout or package resolution errors
-
-**Solution**:
-```bash
-# Use npm ci for faster, more reliable installs
-# Modify Dockerfile: RUN npm ci --only=production
-
-# Or clear npm cache locally
-npm cache clean --force
-rm -rf node_modules package-lock.json
-npm install
-```
+**Note:** The CI pipeline will fail because vulnerabilities are found. We can adjust the severity threshold in `main.yml` if needed for development workflows.
 
 ---
 
-## Next Improvements
+## Why This Is a Short Demo Project
 
+This repository is intentionally scoped as a **portfolio demonstration project** for DevOps skills. The focus is on:
 
-- **Multi-stage Docker Build**: Separate build and runtime stages to reduce image size by 50-70%
-- **Non-root User**: Run container as unprivileged user for improved security posture
-- **Health Checks**: Add `HEALTHCHECK` directive in Dockerfile for container orchestration
-- **Docker Compose**: Multi-container setup with databases, caching layers, and service dependencies
-- **CI/CD Pipeline**: GitHub Actions workflow for automated testing, building, and Docker Hub publishing
-- **Image Scanning**: Integrate Trivy/Snyk for vulnerability detection in container images
-- **Kubernetes Manifests**: Deployment, Service, and Ingress configs for cloud-native deployments
-- **Observability**: Integrate Prometheus metrics and structured logging (JSON output)
-- **Resource Limits**: Define CPU and memory constraints in Dockerfile and orchestration configs
-- **Semantic Versioning**: Automated image tagging based on Git tags/releases
-- **Registry Management**: Push to private registry with image signing and SBOM generation
+- Clean, production-ready configuration patterns
+- Automated CI/CD workflows
+- Security scanning integration
+- Documentation clarity
+
+This is **not** a full production application. Features like database integration, advanced monitoring, Kubernetes deployments, and multi-environment configurations are intentionally excluded to keep the project focused and maintainable as a learning/portfolio artifact.
 
 ---
 
+## Improvements 
+
+
+- **Kubernetes Manifests**: Add Deployment, Service, ConfigMap, and Ingress configurations
+- **Image Registry Integration**: Push images to Docker Hub, GHCR, or private registries with semantic versioning
+- **Multi-Stage Builds**: Optimize Dockerfile to reduce final image size by 50-70%
+- **Advanced CI Policies**: Branch protection rules, required status checks, automated dependency updates
+- **Observability Stack**: Integrate Prometheus metrics, structured logging, and distributed tracing
+- **GitOps Workflow**: ArgoCD or FluxCD for declarative continuous deployment
+
+
+---
+
+## License
+
+This project is licensed by **Sandip Kharel**
