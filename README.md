@@ -1,6 +1,6 @@
-[![CI Pipeline Docker Project](https://github.com/KharelSandip/docker-project-1/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/KharelSandip/docker-project-1/actions/workflows/main.yml)
+[![CI Pipeline Docker Project](https://github.com/KharelSandip/github-action-CI-docker/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/KharelSandip/github-action-CI-docker/actions/workflows/main.yml)
 
-# Docker-Project
+# Github-Action-CI
 
 A containerized Node.js application demonstrating Docker best practices, Docker Compose orchestration, and automated CI/CD pipelines with security scanning.
 
@@ -20,7 +20,7 @@ This project showcases essential DevOps practices:
 
 ## Project Structure
 ```
-docker-project-1/
+github-action-CI-docker/
 ├── .github/
 │   └── workflows/
 │       └── main.yml              # GitHub Actions CI pipeline
@@ -50,7 +50,7 @@ docker-project-1/
 ### Start the Application
 ```bash
 # Clone the repository
-git clone https://github.com/KharelSandip/docker-project-1.git
+git clone https://github.com/KharelSandip/github-action-CI-docker.git
 cd docker-project-1
 
 # Build and start services
@@ -139,7 +139,5 @@ This is **not** a full production application. Features like database integratio
 
 
 ---
-
-## License
 
 This project is licensed by **Sandip Kharel**
