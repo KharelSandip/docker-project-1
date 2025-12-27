@@ -46,10 +46,19 @@ jobs:
         with:
           image-ref: docker-project-1:ci
           format: table
-          output: trivy-report.txt
-          severity: HIGH, CRITICAL
-          exit-code: "1"
+          output: ./trivy-report.txt
+          severity: HIGH,CRITICAL
+          exit-code: "0"
           ignore-unfixed: true
+
+      - name: Fail if HIGH/CRITICAL vulnerabilities found
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: docker-project-1:ci
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
 
       # Upload vulnerability scan results for audit and review
       - name: Upload Trivy scan report
@@ -57,7 +66,7 @@ jobs:
         if: always()
         with:
           name: trivy-vulnerability-report
-          path: trivy-report.txt
+          path: ./trivy-report.txt
           retention-days: 90
 
       # Display built image metadata for verifications
