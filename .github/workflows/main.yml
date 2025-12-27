@@ -38,13 +38,13 @@ jobs:
 
       # Build application Docker image from Dockerfile
       - name: Build Docker image
-        run: docker build -t docker-project-1:ci .
+        run: docker build -t github-action-CI-docker:ci .
 
        # Scan container image for vulnerabilities
       - name: Trivy image scan 
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: docker-project-1:ci
+          image-ref: github-action-CI-docker:ci
           format: table
           output: ./trivy-report.txt
           severity: HIGH,CRITICAL
@@ -54,7 +54,7 @@ jobs:
       - name: Fail if HIGH/CRITICAL vulnerabilities found
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: docker-project-1:ci
+          image-ref: github-action-CI-docker:ci
           format: table
           severity: HIGH,CRITICAL
           ignore-unfixed: true
@@ -72,4 +72,4 @@ jobs:
       # Display built image metadata for verifications
       - name: Display image information
         if: success()
-        run: docker images docker-project-1:ci
+        run: docker images github-action-CI-docker:ci
